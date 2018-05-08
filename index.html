@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Practice</title>
+	<style>
+		#canvas{
+			width: 100%;
+			height: 100%;
+		};
+	</style>
+	<script type="text/javascript" src="babylon.custom.js"></script>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<script type="text/javascript">
+    var canvas, engine, scene, camera, ground;
+    document.addEventListener('DOMContentLoaded', function() {
+        //get canvas
+        canvas = document.getElementById('canvas');
+        
+        //create babylon engine
+        engine = new BABYLON.Engine(canvas, true);
+
+        //create scene
+        scene = new BABYLON.Scene(engine);
+
+        gravity = new BABYLON.Vector3(0, -9.81, 0);
+        physicsEngine = new BABYLON.CannonJSPlugin();
+
+        scene.enablePhysics(gravity,physicsEngine);
+        // create a FreeCamera, and set its position to (x:0, y:4, z:-10)
+        camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 4, 20), scene);
+
+        //camera = new BABYLON.ArcRotateCamera("Camera",0,0,20, new BABYLON.Vector3(0,0,0),scene);
+
+        // target the camera to scene origin
+        camera.setTarget(new BABYLON.Vector3(0,0,0));
+        //camera.setPosition(new BABYLON.Vector3(0,0,10));
+
+        // attach the camera to the canvas
+        //camera.attachControl(canvas,true);
+
+        // create a basic light, aiming 0,8,0
+        var light = new BABYLON.HemisphericLight('hlight', new BABYLON.Vector3(0,8,0), scene);
+
+        ground = new BABYLON.Mesh.CreateGround("ground",100,100,1, scene);
+
+        ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, {mass:0, restitution:0.2, friction: 0.2},scene); 
+
+        var box = new BABYLON.Mesh.CreateBox('box', 2.0, scene);
+        boxX = 1;
+        boxY = 1;
+        boxZ = 1;
+        boxAdd = 1;
+        box.position = new BABYLON.Vector3(1,1,1);
+
+        window.onkeydown = function(event){
+         if(event.keyCode == 39 ){
+           box.position = new BABYLON.Vector3(boxX-boxAdd,boxY,boxZ);
+           boxX = boxX-boxAdd;            
+            // box.physicsImpostor.applyImpulse(new BABYLON.Vector3(-1,0,0), box.getAbsolutePosition());
+         }
+         if(event.keyCode == 37 ){
+            box.position = new BABYLON.Vector3(boxX+boxAdd,boxY,boxZ);
+            boxX = boxX+boxAdd;            
+            // box.physicsImpostor.applyImpulse(new BABYLON.Vector3(1,0,0), box.getAbsolutePosition());
+         }
+         if(event.keyCode == 38 ){
+            box.position = new BABYLON.Vector3(boxX,boxY,boxZ+boxAdd);
+            boxZ = boxZ+boxAdd;            
+            // box.physicsImpostor.applyImpulse(new BABYLON.Vector3(0,0,1), box.getAbsolutePosition());
+         }
+         if(event.keyCode == 40 ){
+            box.position = new BABYLON.Vector3(boxX,boxY,boxZ-boxAdd);
+            boxZ = boxZ-boxAdd;            
+            // box.physicsImpostor.applyImpulse(new BABYLON.Vector3(0,0,-1), box.getAbsolutePosition());
+         }
+        }
+
+        var box2 = new BABYLON.Mesh.CreateBox('box', 1.0, scene);
+        box2.position = new BABYLON.Vector3(10,0,-5);
+
+
+        box.physicsImpostor = new BABYLON.PhysicsImpostor(box, BABYLON.PhysicsImpostor.BoxImpostor, 
+        	{mass:0.1, restitution: 0.25, friction:0.2},scene);
+
+        box2.physicsImpostor = new BABYLON.PhysicsImpostor(box2, BABYLON.PhysicsImpostor.BoxImpostor, 
+        	{mass:1, restitution: 0.5, friction:0.2},scene);
+
+        box.physicsImpostor.registerOnPhysicsCollide(box2.physicsImpostor,
+            function(main,collide){
+                console.log(main.object.position);
+        })
+
+       engine.runRenderLoop(function() {
+
+			if (box2.position.x > -1){
+	            box2.position.x = box2.position.x - 0.005;
+			}
+
+			box2.position.x = box.position.x - 1;
+
+            scene.render();
+            if(box.intersectsMesh(box2, true)){
+            	box.scaling.z = box.scaling.z - 0.5;
+            	box.scaling.y = box.scaling.y - 0.5;
+            	box.scaling.x = box.scaling.x - 0.5;            		
+            }
+        });
+    });
+
+</script>
+
+</body>
+</html>
+
