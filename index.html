@@ -97,11 +97,9 @@
 
        engine.runRenderLoop(function() {
 
-			if (box2.position.x > -1){
+			if (box2.position.x > -10){
 	            box2.position.x = box2.position.x - 0.005;
 			}
-
-			box2.position.x = box.position.x - 1;
 
             scene.render();
             if(box.intersectsMesh(box2, true)){
